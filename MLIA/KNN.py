@@ -1,4 +1,4 @@
-# Listing 2.1
+# Listing 2.1, 2.2
 from numpy import *
 import operator
 
@@ -34,3 +34,11 @@ def classify0(inX, dataSet, labels, k):
 		classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1
 	sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
 	return sortedClassCount[0][0]
+
+	def file2matrix(filename):
+		fr = open(filename)
+		numberOfLines = len(fr.readlines())
+		returnMat = zeros((numberOfLines, 3))
+		classLabelVector = []
+		fr = open(filename)
+		
