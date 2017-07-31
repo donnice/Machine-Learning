@@ -1,4 +1,5 @@
 # Listing 2.1, 2.2
+# P 53
 from numpy import *
 import operator
 
@@ -51,5 +52,13 @@ def file2matrix(filename):
 		classLabelVector.append(listFromLine[-1])
 		index += 1
 	return returnMat, classLabelVector
-			
 
+def autoNorm(dataSet):
+	minVals = dataSet.min(0)
+	maxVals = dataSet.max(0)
+	ranges = maxVals - minVals
+	normDataSet = zeros(shape(dataSet))
+	m = dataSet.shape[0]
+	normDataSet = dataSet - tile(minVals, (m, 1))
+	normDataSet = normDataSet/tile(ranges, (m, 1))	
+	return normDataSet, ranges, minVals
