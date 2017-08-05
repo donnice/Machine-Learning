@@ -14,7 +14,7 @@ Check if every item in the dataset is in the same class:
 from math import log
 
 # H = -Sum(1,n)(p(xi)log(p(xi))), were p(xi) is the prob of choosing this class
-def calShannonEnt(dataSet):
+def calcShannonEnt(dataSet):
     '''
     Disorder of the dataSet
     '''
@@ -40,11 +40,36 @@ def createDataSet():
     labels = ['no surfacing', 'flippers']
     return dataSet, labels
 
+# extend: way to append multiple elements in the list
 def splitDataSet(dataSet, axis, value):
     retDataSet = []
     for featVec in dataSet:
         if featVec[axis] == value:
+            # cut out the feature split on
             reducedFeatVec = featVec[:axis]
             reducedFeatVec.extend(featVec[axis+1:])
             retDataSet.append(reducedFeatVec)
     return retDataSet
+
+# Use entropy to tell which split best organizes the data
+def chooseBestFeatureToSplit(dataSet):
+    numFeatures = len(dataSet[0]) - 1
+    baseEntropy = calcShannonEnt(dataSet)
+    bestInfoGain = 0.0
+    bestFeature = -1
+    for i in range(numFeatures):
+        # Create unique list of class labels
+        featList = [example[i] for example in dataSet]
+        uniqueVals = set(featList)
+        newEntropy = 0.0
+        # Calculate entropy for each split
+        for value in uniqueVals:
+            subDataSet = splitDataSet(dataSet, i, value)
+            prob = len(subDataSet)
+            newEntropy += prob * calcShannonEnt(subDataSet)
+        infoGain = baseEntropy - newEntropy
+        # find the best infomation gain
+        if(infoGain > bestInfoGain):
+            bestInfoGain = infoGain
+            bestFeature = i
+    return bestFeature
