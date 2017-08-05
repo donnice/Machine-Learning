@@ -15,11 +15,16 @@ from math import log
 
 # H = -Sum(1,n)(p(xi)log(p(xi))), were p(xi) is the prob of choosing this class
 def calShannonEnt(dataSet):
+    '''
+    Disorder of the dataSet
+    '''
     numEntries = len(dataSet)
     labelCounts = {}
     for featVec in dataSet:
         currentLabel = featVec[-1]
-        labelCounts[currentLabel] = labelCounts.get(labelCounts, 0) + 1
+        # labelCounts[currentLabel] = labelCounts.get(labelCounts, 0) + 1
+        labelCounts[currentLabel] = 0
+        labelCounts[currentLabel] += 1
     shannonEnt = 0.0
     for key in labelCounts:
         prob = float(labelCounts[key])/numEntries
@@ -34,3 +39,12 @@ def createDataSet():
             [0, 1, 'No']]
     labels = ['no surfacing', 'flippers']
     return dataSet, labels
+
+def splitDataSet(dataSet, axis, value):
+    retDataSet = []
+    for featVec in dataSet:
+        if featVec[axis] == value:
+            reducedFeatVec = featVec[:axis]
+            reducedFeatVec.extend(featVec[axis+1:])
+            retDataSet.append(reducedFeatVec)
+    return retDataSet
