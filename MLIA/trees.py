@@ -23,7 +23,8 @@ def calcShannonEnt(dataSet):
     for featVec in dataSet:
         currentLabel = featVec[-1]
         # labelCounts[currentLabel] = labelCounts.get(labelCounts, 0) + 1
-        labelCounts[currentLabel] = 0
+        if currentLabel not in labelCounts.keys():
+            labelCounts[currentLabel] = 0
         labelCounts[currentLabel] += 1
     shannonEnt = 0.0
     for key in labelCounts:
@@ -53,6 +54,9 @@ def splitDataSet(dataSet, axis, value):
 
 # Use entropy to tell which split best organizes the data
 def chooseBestFeatureToSplit(dataSet):
+    '''
+    The information gain is the reduction in entropy
+    '''
     numFeatures = len(dataSet[0]) - 1
     baseEntropy = calcShannonEnt(dataSet)
     bestInfoGain = 0.0
@@ -65,7 +69,7 @@ def chooseBestFeatureToSplit(dataSet):
         # Calculate entropy for each split
         for value in uniqueVals:
             subDataSet = splitDataSet(dataSet, i, value)
-            prob = len(subDataSet)
+            prob = len(subDataSet)/float(len(dataSet))
             newEntropy += prob * calcShannonEnt(subDataSet)
         infoGain = baseEntropy - newEntropy
         # find the best infomation gain
