@@ -10,7 +10,7 @@ Check if every item in the dataset is in the same class:
                 call createBranch and add the result to the branch node
         return branch node
 '''
-
+import operator
 from math import log
 
 # H = -Sum(1,n)(p(xi)log(p(xi))), were p(xi) is the prob of choosing this class
@@ -77,3 +77,15 @@ def chooseBestFeatureToSplit(dataSet):
             bestInfoGain = infoGain
             bestFeature = i
     return bestFeature
+
+def majorityCnt(classList):
+    classCount = {}
+    for vote in classList:
+        if vote not in classCount.keys():
+            classCount[vote] = 0
+        classCount[vote] += 1
+    sortedClassCount = sorted(classCount.iteritems(),
+    key=operator.itemgetter(1), reverse=True)
+    return sortedClassCount[0][0]
+
+def 
