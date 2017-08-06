@@ -88,4 +88,23 @@ def majorityCnt(classList):
     key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
 
-def 
+def createTree(dataSet, labels):
+    classList = [example[-1] for example in dataSet]
+    # Stop when all classes are equal
+    if classList.count(classList[0]) == len(classList):
+        return classList[0]
+    # When no more features, return majority
+    if len(dataSet[0]) == 1:
+        return majorityCnt(classList)
+    bestFeat = chooseBestFeatureToSplit(dataSet)
+    bestFeatLabel = labels[bestFeat]
+    myTree = {bestFeatLabel:{}}
+    del(labels[bestFeat])
+    # get list of unique values
+    featValues = [example[bestFeat] for example in dataSet]
+    uniqueVals = set(featValues)
+    for value in uniqueVals:
+        subLabels = labels[:]
+        myTree[bestFeatLabel][value] = createTree(splitDataSet\
+        (dataSet, bestFeat, value), subLabels)
+    return myTree
