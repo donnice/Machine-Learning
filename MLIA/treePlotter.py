@@ -18,3 +18,16 @@ def plotNode(nodeTxt, centerPt, parentPt, nodeType):
     xycoords='axes fraction', xytext=centerPt,
     textcoords='axes fraction', va="center", ha="center",
     bbox=nodeType, arrowprops=arrow_args)
+
+# Identifying the # of leaves in a tree and the depth
+def getNumLeafs(myTree):
+    numLeafs = 0
+    firstStr = myTree.keys()[0]
+    secondDict = myTree[firstStr]
+    for key in secondDict.keys():
+        if type(secondDict[key]).__name__=='dict':
+            numLeafs += getNumLeafs(secondDict[key])
+        else:
+            numLeafs += 1
+    return numLeafs
+
