@@ -60,7 +60,23 @@ def plotMidText(cntrPt, parentPt, txtString):
 def plotTree(myTree, parentPt, nodetxt):
     numLeafs = getNumLeafs(myTree)
     getTreeDepth(myTree)
-    pass
+    firstStr = myTree.keys()[0]
+    cntrPt = (plotTree.xOff + (1.0 + float(numLeafs))/2.0/plotTree.totalW, \
+                        plotTree.yOff)
+    plotMidText(cntrPt, parentPt, decisionNode) # Plot child value
+    plotNode(firstStr, cntrPt, parentPt, decisionNode)
+    secondDict = myTree[firstStr]
+    plotTree.yOff = plotTree.yOff - 1.0/plotTree.totalD # Decrement Y offset
+    for key in secondDict.keys():
+        if type(secondDict[key]).__name__ == 'dict':
+            plotTree(secondDict[key], cntrPt, str(key))
+        else:
+            plotTree.xOff = plotTree.xOff + 1.0/plotTree.totalW
+            plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), \
+                    cntrPt, leafNode)
+            plotMidText((plotTree.xOff, plotTree.yOff), cntrPt, str(key))
+    plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD
+
 
 def createPlot(inTree):
     fig = plt.figure(1, facecolor='white')
