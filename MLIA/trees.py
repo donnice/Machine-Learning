@@ -110,6 +110,7 @@ def createTree(dataSet, labels):
     return myTree
 
 # Classification function for an existing decision tree
+# Doesn't understand
 def classify(inputTree, featLabels, testVec):
     firstStr = inputTree.keys()[0]
     secondDict = inputTree[firstStr]
