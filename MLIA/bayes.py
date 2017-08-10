@@ -1,3 +1,5 @@
+# Bayes: p(x|y) = p(y|x)p(x)/p(y)
+
 def loadDataSet():
     postingList=[['my', 'dog', 'has', 'flea', 'problems', 'help', 'please'],
                  ['maybe', 'not', 'take', 'him', 'to', 'dog', 'park', 'stupid'],
@@ -23,3 +25,35 @@ def setOfWords2Vec(vocabList, inputSet):
             print "the word: %s is not in my Vocabulary!" % word
     return returnVec
 
+# Naive Bayes classifier training function
+'''
+Count the number of documents in each class
+for every training document:
+    for each class:
+        if a token appears in the document -> increment the count for token
+        increment the count for tokens
+    for each class:
+        for each token:
+            divide the token count by total count to get conditional probs
+    return conditional prob for each class
+'''
+
+def trainNB0(trainMatrix, trainCategory):
+    numTrainDocs = len(trainMatrix)
+    numWords = len(trainMatrix[0])
+    pAbusive = sum(trainCategory)/float(numTrainDocs)
+    # initialize probabilities
+    p0Num = zeros(numWords); p1Num = zeros(numWords)
+    p0Denom = 0.0; p1Denom = 0.0
+
+    for i in range(numTrainDocs):
+        # Vector addition
+        if trainCategory[i] == 1:
+            p1Num += trainMatrix[i]
+            p1Denom += sum(trainMatrix[i])
+        else:
+            p0Num += trainMatrix[i]
+            p0Denom += sum(trainMatrix[i])
+    p1Vect = p1Num/p1Denom
+    p0Vect = p0Num/p0Denom
+    return p0Vect, p1Vect, pAbusive
