@@ -1,4 +1,5 @@
 # Bayes: p(x|y) = p(y|x)p(x)/p(y)
+from numpy import *
 
 def loadDataSet():
     postingList=[['my', 'dog', 'has', 'flea', 'problems', 'help', 'please'],
@@ -57,3 +58,26 @@ def trainNB0(trainMatrix, trainCategory):
     p1Vect = p1Num/p1Denom
     p0Vect = p0Num/p0Denom
     return p0Vect, p1Vect, pAbusive
+
+# Naive Bayes classify
+def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
+    p1 = sum(vec2Classify * p1Vec) + log(pClass1)
+    p0 = sum(vec2Classify * p0Vec) + log(1.0 - pClass1)
+    if p1 > p0:
+        return 1
+    else:
+        return 0
+
+def testingNB():
+    listOPosts, listClasses = loadDataSet()
+    myVocabList = createVocabList(listOPosts)
+    trainMat = []
+    for postinDoc in listOPosts:
+        trainMat.append(setOfWords2Vec(myVocabList, postinDoc))
+        p0V, p1V, pAb = trainNB0(array(trainMat), array(listClasses))
+        testEntry = ['love', 'my', 'dalmation']
+        thisDoc = array(setOfWords2Vec(myVocabList, testEntry))
+        print testEntry,'classified as: ',classifyNB(thisDoc, p0V, p1V, pAb)
+        testEntry = ['stupid', 'garbage']
+        thisDoc = array(setOfWords2Vec(myVocabList, testEntry))
+        print testEntry,'classified as: ',classifyNB(thisDoc, p0V, p1V, pAb)
