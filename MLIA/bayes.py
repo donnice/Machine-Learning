@@ -81,3 +81,26 @@ def testingNB():
         testEntry = ['stupid', 'garbage']
         thisDoc = array(setOfWords2Vec(myVocabList, testEntry))
         print testEntry,'classified as: ',classifyNB(thisDoc, p0V, p1V, pAb)
+
+# Bag of words
+'''
+Quite alike setOfWords2Vec(), except that
+every time it encoun- ters a word, 
+it increments the word vector r
+ather than setting the word vector to 1 for a given index.
+'''
+def bagOfWords2VecMN(vocabList, inputSet):
+    returnVec = [0] * len(vocabList)
+    for word in inputSet:
+        if word in vocabList:
+            returnVec[vocabList.index(word)] += 1
+    return returnVec
+
+# Eliminate anything under two chars long and convert to lower case
+# >>> s = "I am the king of the world"
+# >>> bayes.textParse(s)
+# ['the', 'king', 'the', 'world']
+def textParse(bigString):
+    import re
+    listOfTokens = re.split(r'\W+', bigString)
+    return [tok.lower() for tok in listOfTokens if len(tok) > 2]
