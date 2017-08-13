@@ -85,7 +85,7 @@ def testingNB():
 # Bag of words
 '''
 Quite alike setOfWords2Vec(), except that
-every time it encoun- ters a word, 
+every time it encounters a word, 
 it increments the word vector r
 ather than setting the word vector to 1 for a given index.
 '''
@@ -136,6 +136,8 @@ def spamTest():
         wordVector = setOfWords2Vec(vocabList, docList[docIndex])
         if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
             errorCount += 1
+    print trainMat[0][:10]
+    print trainClasses[:30]
     print 'The error rate is: ', float(errorCount)/len(testSet)
 
 # Using Naive Bayes to find locally used words
@@ -161,3 +163,41 @@ def calcMostFreq(vocabList, fullText):
 
 def localWords(feed1, feed0):
     import feedparser
+    docList = []; classList = []; fullText = []
+    minLen = min(len(feed1['entries']), len(feed0['entries']))
+    for i in range(minLen):
+        #access one feed at a time
+        wordList = textParse(feed1['entries'][i]['summary'])
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(1)
+        wordList = textParse(feed0['entries'][i]['summary'])
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(0)
+    vocabList = createVocabList(docList)
+    top30Words = calcMostFreq(vocabList, fullText)
+    for pairW in top30Words:
+        if pairW[0] in vocabList:
+            vocabList.remove(pairW[0])
+    trainingSet = range(2*minLen)
+    testSet = []
+    for i in range(20):
+        randIndex = int(random.uniform(0, len(trainingSet)))
+        testSet.append(trainingSet[randIndex])
+        del(trainingSet[randIndex])
+    trainMat = []; trainClasses = []
+    for docIndex in trainingSet:
+        # frequency of each word
+        trainMat.append(bagOfWords2VecMN(vocabList, docList[docIndex]))
+        
+        trainClasses.append(classList[randIndex])
+    p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
+    errorCount = 0
+    for docIndex in testSet:
+        wordVector = bagOfWords2VecMN(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != \
+        classList[docIndex]:
+            errorCount += 1
+    print 'the error rate is: ', float(errorCount)/len(testSet)
+    return vocabList, p0V, p1V
