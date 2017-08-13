@@ -137,3 +137,27 @@ def spamTest():
         if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
             errorCount += 1
     print 'The error rate is: ', float(errorCount)/len(testSet)
+
+# Using Naive Bayes to find locally used words
+'''
+1. Collect from RSS read
+2. Prepare: Parse text into token vectors
+3. Analyze: Inspect the tokens to make sure parsing was done correctly
+4. Train: Use trainNB0()
+5. Test: Look at the error rate to make sure it's working
+6. Use: We will build a compelete program to wrap everything together
+'''
+
+# REE feed classifier and frequent word removal func
+def calcMostFreq(vocabList, fullText):
+    # calculate the frequence of occurence
+    import operator
+    freqDict = {}
+    for token in vocabList:
+        freqDict[token] = fullText.count(token)
+    sortedFreq = sorted(freqDict.iteritems(), key=operator.itemgetter(1),\
+                reverse=True)
+    return sortedFreq[:30]
+
+def localWords(feed1, feed0):
+    import feedparser
