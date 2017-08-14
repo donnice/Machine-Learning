@@ -29,6 +29,14 @@ def loadDataSet():
 def sigmoid(inX):
     return 1.0/(1+exp(-inX))
 
+'''
+Start with the weights all set to 1
+Repeat R number of times:
+    Calculate the gradient of entire dataset
+    Update the weights vector by alpha*gradient
+    Return the weights vector
+'''
+
 def gradAscent(dataMatIn, classLabels):
     dataMatrix = mat(dataMatIn)
     labelMat = mat(classLabels).transpose()
@@ -46,7 +54,7 @@ def gradAscent(dataMatIn, classLabels):
 def plotBestFit(wei):
     import matplotlib.pyplot as plt
     dataMat, labelMat = loadDataSet()
-    weights = wei.getA()
+    weights = wei.getA() # become array
     dataArr = array(dataMat)
     n = shape(dataArr)[0]
     xcord1 = []; ycord1 = []
@@ -63,8 +71,28 @@ def plotBestFit(wei):
     ax.scatter(xcord1, ycord1, s=30, c='red', marker='s')
     ax.scatter(xcord2, ycord2, s=30, c='green')
     x = arange(-3.0, 3.0, 0.1)
+    # best fit line
     y = (-weights[0]-weights[1]*x)/weights[2]
     ax.plot(x, y)
     plt.xlabel('X1')
     plt.ylabel('X2')
     plt.show()
+
+'''
+Start with the weights all set to 1
+For each piece of data in the dataset:
+    Calculate the gradient of one piece of data
+    Update the weights vector by alpha*gradient
+    Return the weights vector
+'''
+
+# Stochastic gradient ascent
+def stocGradAscent0(dataMatrix, classLabels):
+    m, n = shape(dataMatrix)
+    alpha = 0.01
+    weights = ones(n)
+    for i in range(m):
+        h = sigmoid(dataMatrix[i]*weights)
+        error = classLabels[i] - h
+        weights = weights + alpha*error*dataMatrix[i]
+    return weights
