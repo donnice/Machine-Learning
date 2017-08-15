@@ -110,3 +110,19 @@ def stocGradAscent1(dataMatrix, classLabels, numIter = 150):
             weights = weights + alpha * error * dataMatrix[randIndex]
             del(dataIndex[randIndex])
     return weights
+
+def classifyVector(inX, weights):
+    prob = sigmoid(sum(inX*weights))
+    if prob > 0.5: return 1.0
+    else: return 0.0
+
+def colicTest():
+    pass
+
+def multiTest():
+    numTests = 10
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print "after %d iterations the average error rate is: %f" % (numTests, \
+                            errorSum/float(numTests))
