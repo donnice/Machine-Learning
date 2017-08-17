@@ -32,3 +32,16 @@ def clipAlpha(aj, H, L):
     if L > aj:
         aj = L
     return aj
+
+'''
+Pseudo code for simplified SMO:
+
+Create an alphas vector filled with 0s
+While the number of iterations is less than MaxIterations:
+    For every data vector in the dataset:
+        If the data vector can be optimized:
+            Select another data vector at random
+            Optimize the two vectors together
+            If the vector cannot be optimized -> break
+    If no vector were optimized -> increse the iteration count
+'''
