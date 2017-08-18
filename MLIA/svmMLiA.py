@@ -20,7 +20,7 @@ def loadDataSet(fileName):
     for line in fr.readlines():
         lineArr = line.strip().split('\t')
         dataMat.append([float(lineArr[0]), float(lineArr[1])])
-        labelMat.append(float(lineAr[2]))
+        labelMat.append(float(lineArr[2]))
     return dataMat, labelMat
 
 def selectJrand(i, m):
@@ -86,17 +86,17 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
                 eta = 2.0 * dataMatrix[i, :] * dataMatrix[j, :].T - \
                       dataMatrix[i, :] * dataMatrix[i, :].T - \
                       dataMatrix[j, :] * dataMatrix[j, :].T
-                if eta > 0:
+                if eta >= 0: #best optimized value of alpha[j]
                     print "eta>=0"
                     continue
 
                 # Update i by same amount as j in opposite direction
                 alphas[j] -= labelMat[j] * (Ei - Ej)/eta
                 alphas[j] = clipAlpha(alphas[j], H, L)
-                if(abs(alphas[i] - alphaJold) < 0.00001):
+                if(abs(alphas[j] - alphaJold) < 0.00001):
                     print "j not moving enough"
                     continue
-                alphas[i] += label[j] * label[i] * \
+                alphas[i] += labelMat[j] * labelMat[i] * \
                           (alphaJold - alphas[j])
                 # Set the constant terms
                 b1 = b - Ei - labelMat[i] * (alphas[i] - alphaIold) * \
