@@ -1,8 +1,32 @@
 from numpy import *
 from svmMLiA import *
 
+# kTup is the generic tuple that contains information about kernel
+def kernelTrans(X, A, kTup):
+    '''
+    First arg in tuple is a string describes what type of kernel should be used
+    Other args are optional args
+    '''
+    m, n = shape(X)
+    K = mat(zeros((m, 1)))
+    # .T attribute and the .transpose() method are the same—they both return the transpose of the array.
+    
+    if kTup[0] == 'lin':
+        K = X * A.T
+    elif kTup[0] == 'rbf': # radial bias function
+        for j in range(m):
+            deltaRow = X[j,:] - A
+            K[j] = deltaRow * deltaRow.T
+        # Element-wise division
+        K = exp(K/(-1*kTup[1]**2))
+    else:
+        raise NameError('Huston We have a problem -- \
+        That Kernel is not recognized')
+    return K
+        
+
 class optStruct:
-    def __init__(self, dataMatIn, classLabels, C, toler):
+    def __init__(self, dataMatIn, classLabels, C, kTup):
         self.X = dataMatIn
         self.labelMat = classLabels
         self.C = C
@@ -12,10 +36,19 @@ class optStruct:
         self.b = 0
         # Error cache: 1. Whether eCache is valid and 2. actual E value
         self.eCache = mat(zeros((self.m, 2)))
+        self.K = mat(zeros((self.m, self.m)))
+        for i in range(self.m):
+            self.K[:, i] = kernelTrans(self.X, self.X[i, :], kTup)
 
 def calcEk(oS, k):
     fXk = float(multiply(oS.alphas, oS.labelMat).T * \
             (oS.X * oS.X[k, :].T)) + oS.b
+    Ek = fXk - float(oS.labelMat[k])
+    return Ek
+
+def calcEk4Kernels(oS, k):
+    fXk = float(multiply(oS.alphas, oS.labelMat).T * \
+            oS.K[:, k] + oS.b)
     Ek = fXk - float(oS.labelMat[k])
     return Ek
 
@@ -86,6 +119,52 @@ def innerL(i, oS):
         b2 = oS.b - Ei - oS.labelMat[i] * (oS.alphas[i] - alphaIold) *\
              oS.X[i, :] * oS.X[j, :].T - oS.labelMat[j] *\
              (oS.alphas[j] - alphaJold) * oS.X[j, :] * oS.X[j, :].T
+        if (0 < oS.alphas[j]) and (oS.C > oS.alphas[i]):
+            oS.b = b1
+        elif (0 < oS.alphas[j]) and (oS.C > oS.alphas[j]):
+            oS.b = b2
+        else:
+            oS.b = (b1 + b2)/2.0
+        return 1
+    else:
+        return 0
+
+# Full Platt SMO optimization routine, kernels
+def innerL4Kernel(i, oS):
+    Ei = calcEk(oS, i)
+    if((oS.labelMat[i] * Ei < -oS.tol) and (oS.alphas[i] < oS.C)) or \
+      ((oS.labelMat[i] * Ei > oS.tol) and (oS.aplhas[i] > 0)):
+        j, Ej = selectJ(i, oS, Ei)
+        alphaIold = oS.alphas[i].copy()
+        alphaJold = oS.alphas[j].copy()
+        if(oS.labelMat[i] != oS.labelMat[j]):
+            L = max(0, oS.alphas[j] - oS.alphas[i])
+            H = min(oS.C, oS.C + oS.alphas[j] - oS.alphas[i])
+        else:
+            L = max(0, oS.alphas[j] + oS.alphas[i] - oS.C)
+            H = min(oS.C, oS.alphas[j] + oS.alphas[i])
+        if L == H:
+            print "L==H"
+            return 0
+        eta = 2.0 * oS.K[i, j] - oS.K[i, i] - oS.K[j, j]
+        if eta >= 0:
+            print "eta>=0"
+            return 0
+
+        # Update Eache
+        oS.alphas[j] -= oS.labelMat[j] * (Ei - Ej)/eta
+        oS.alphas[j] = clipAlpha(oS.alphas[j], H, L)
+        updateEk(oS, j)
+        if(abs(oS.alphas[j] - alphaJold) < 0.00001):
+            print "j not moving enough"
+            return 0
+        oS.alphas[i] += oS.labelMat[j] * oS.labelMat[i] *\
+                      (alphaJold - oS.alphas[j])
+        updateEk(oS, i)
+        b1 = oS.b - Ei - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.K[i, i] - \
+                            oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.K[i, j]
+        b2 = oS.b - Ej - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.K[i, j] - \
+                            oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.K[j, j]
         if (0 < oS.alphas[j]) and (oS.C > oS.alphas[i]):
             oS.b = b1
         elif (0 < oS.alphas[j]) and (oS.C > oS.alphas[j]):
