@@ -95,4 +95,33 @@ def innerL(i, oS):
         return 1
     else:
         return 0
-            
+
+# Platt SMO outer loop
+def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
+    oS = optStruct(mat(dataMatIn), mat(classLabels).transpose(), C, toler)
+    iterance = 0
+    entireSet = True
+    alphaPairsChanged = 0
+    while(iterance < maxIter) and ((alphaPairsChanges > 0) or entireSet):
+        alphaPairsChanged = 0
+        # Go over all values
+        if entireSet:
+            for i in range(oS.m):
+                alphaPairsChanged += innerL(i, oS)
+            print "fullSet, iterance: %d i:%d, pairs changed %d" %\
+            (iterance, i, alphaPairsChanged)
+            iterance += 1
+        # Go over non-bound values
+        else:
+            nonBoundIs = nonzero((oS.alphas.A > 0) * (oS.alphas.A < C))[0]
+            for i in nonBoundIs:
+                alphaPairsChanged += innerL(i, oS)
+                print "non-bound, iterance: %d i :%d, pairs changed %d" %\
+                (iterance, i, alphaPairsChanged)
+            iterance += 1
+        if entireSet:
+            entireSet = False
+        elif (alphaPairsChanged == 0):
+            entireSet = True
+        print "Iteration number: %d" % iterance
+    return oS.b, oS.alphas
