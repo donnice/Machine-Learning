@@ -213,3 +213,33 @@ def calcWs(alphas, dataArr, classLabels):
     for i in range(m):
         w += multiply(alphas[i]*labelMat[i], X[i, :].T)
     return w
+
+def testRbf(k1=1.3):
+    dataArr, labelArr = loadDataSet('testSetRBF.txt')
+    b, alphas = smoP(dataArr, labelArr, 200, 0.0001, 10000, ('rbf', k1))
+    datMat = mat(dataArr)
+    labelMat = mat(labelArr).transpose()
+    svInd = nonzero(alphas.A > 0)[0]
+    # Create matrix for support vectors
+    sVs = datMat[svInd]
+    labelSV = labelMat[svInd]
+    print "There are %d support vectors" % shape(sVs)[0]
+    m, n = shape(datMat)
+    errorCount = 0
+    for i in range(m):
+        kernelEval = kernelTrans(sVs, datMat[i, :], ('rbf', k1))
+        predict = kernelEval.T * multiply(labelSV, alphas[svInd]) + b
+        if sign(predict)!=sign(labelArr[i]):
+            errorCount += 1
+    print "The training error rate is: %f" % (float(errorCount)/m)
+    dataArr, labelArr = loadDataSet('testSetRBF2.txt')
+    errorCount = 0
+    datMat = mat(dataArr)
+    labelMat = mat(labelArr).transpose()
+    m, n = shape(datMat)
+    for i in range(m):
+        kernelEval = kernelTrans(sVs, datMat[i, :], ('rbf', k1))
+        predict = kernelEval.T * multiply(labelSV, alphas[svInd]) + b
+        if sign(predict)!=sign(labelArr[i]):
+            errorCount += 1
+    print "The training error rate is: %f" % (float(errorCount)/m)
