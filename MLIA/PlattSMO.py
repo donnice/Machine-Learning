@@ -10,7 +10,6 @@ def kernelTrans(X, A, kTup):
     '''
     m, n = shape(X)
     K = mat(zeros((m, 1)))
-    # .T attribute and the .transpose() method are the same—they both return the transpose of the array.
     
     if kTup[0] == 'lin':
         K = X * A.T
@@ -18,6 +17,7 @@ def kernelTrans(X, A, kTup):
         for j in range(m):
             deltaRow = X[j,:] - A
             K[j] = deltaRow * deltaRow.T
+            print K[j]
         # Element-wise division
         '''
         Gaussian version:
@@ -31,7 +31,7 @@ def kernelTrans(X, A, kTup):
         
 
 class optStruct:
-    def __init__(self, dataMatIn, classLabels, C, kTup):
+    def __init__(self, dataMatIn, toler, classLabels, C, kTup):
         self.X = dataMatIn
         self.labelMat = classLabels
         self.C = C
@@ -182,7 +182,7 @@ def innerL4Kernel(i, oS):
 
 # Platt SMO outer loop
 def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
-    oS = optStruct(mat(dataMatIn), mat(classLabels).transpose(), C, toler)
+    oS = optStruct(mat(dataMatIn),mat(classLabels).transpose(), C, toler, kTup)
     iterance = 0
     entireSet = True
     alphaPairsChanged = 0
@@ -265,3 +265,32 @@ def loadImages(dirName):
             hwLabels.append(1)
             trainingMat[i, :] = img2vector('%s/%s' % (dirName, fileNameStr))
     return trainingMat, hwLabels
+
+def testDigits(kTup=('rbf', 10)):
+    dataArr, labelArr = loadImages('trainingDigits')
+    b, alphas = smoP(dataArr, labelArr, 200, 0.0001, 10000, kTup)
+    datMat = mat(dataArr)
+    labelMat = mat(labelArr).transpose()
+    svInd = nonzero(alphas.A > 0)[0]
+    sVs = datMat[svInd]
+    labelSV = labelMat[svInd]
+    print "There are %d Support Vectors" % shape(sVs)[0]
+    m, n = shape(datMat)
+    errorCount = 0
+    for i in range(m):
+        kernelEval = kernelTrans(sVs, datMat[i, :], kTup)
+        predict = kernelEval.T * multiply(labelSV, alphas[svInd]) + b
+        if sign(predict) != sign(labelArr[i]):
+            errorCount += 1
+    print "The error rate is: %f" % (float(errorCount)/m)
+    dataArr, labelArr = loadImages('testDigits')
+    errorCount = 0
+    datMat = mat(dataArr)
+    labelMat = mat(labelArr).transpose()
+    m, n = shape(datMat)
+    for i in range(m):
+        kernelEval = kernelTrans(sVs, datMat[i, :], kTup)
+        predict = kernelEval.T * multiply(labelSV, alphas[svInd]) + b
+        if sign(predict) != sign(labelArr[i]):
+            errorCount += 1
+    print "The error rate is: %f" % (float(errorCount)/m)
