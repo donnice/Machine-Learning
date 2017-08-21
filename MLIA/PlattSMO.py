@@ -1,5 +1,6 @@
 from numpy import *
 from svmMLiA import *
+from KNN import *
 
 # kTup is the generic tuple that contains information about kernel
 def kernelTrans(X, A, kTup):
@@ -18,6 +19,10 @@ def kernelTrans(X, A, kTup):
             deltaRow = X[j,:] - A
             K[j] = deltaRow * deltaRow.T
         # Element-wise division
+        '''
+        Gaussian version:
+        k(x,y) = exp(-||x-y||^2/(2sigma^2))
+        '''
         K = exp(K/(-1*kTup[1]**2))
     else:
         raise NameError('Huston We have a problem -- \
@@ -243,3 +248,20 @@ def testRbf(k1=1.3):
         if sign(predict)!=sign(labelArr[i]):
             errorCount += 1
     print "The training error rate is: %f" % (float(errorCount)/m)
+
+def loadImages(dirName):
+    from os import listdir
+    hwLabels = []
+    trainingFileList = listdir(dirName)
+    m = len(trainingFileList)
+    trainingMat = zeros((m, 1024))
+    for i in range(m):
+        fileNameStr = trainingFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        classNameStr = int(fileStr.split('_')[0])
+        if classNameStr == 9:
+            hwLabels.append(-1)
+        else:
+            hwLabels.append(1)
+            trainingMat[i, :] = img2vector('%s/%s' % (dirName, fileNameStr))
+    return trainingMat, hwLabels
