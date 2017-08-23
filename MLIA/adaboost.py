@@ -61,9 +61,37 @@ For each iteration:
     Find the best stump using buildStump()
     Add the best stump to the stump array
     Calculate alpha
-    Calculate new weight vector -D
+    Calculate new weight vector - D
     Update the aggregate class estimate
     If the error rate == 0.0:
         break out of the for loop
+
+
+Di(t+1) = Di(t)*exp(-a)/Sum(D) if correctly predicted
+Di(t+1) = Di(t)*exp(a)/Sum(D) if incorrectly predicted
 '''
 
+def adaBoostTrainDS(dataArr, classLabels, numIt = 40):
+    weakClassArr = []
+    m = shape(dataArr)[0]
+    D = mat(ones((m, 1))/m)
+    aggClassEst = mat(zeros((m, 1)))
+    for i in range(numIt):
+        bestStump, error, classEst = buildStump(dataArr, classLabels, D)
+        print "D:", D.T
+        alpha = float(0.5*log((1.0 - error)/max(error, 1e-16)))
+        bestStump['alpha'] = alpha
+        weakClassArr.append(bestStump)
+        print "classEst: ", classEst.T
+        expon = multiply(-1*alpha*mat(classLabels).T, classEst)
+        D = multiply(D, exp(expon))
+        D = D / D.sum()
+        aggClassEst += alpha * classEst
+        print "aggClassEst: ", aggClassEst.T
+        aggErrors = multiply(sign(aggClassEst) != \
+                    mat(classLabels).T, ones((m, 1)))
+        errorRate = aggErrors.sum() / m
+        print "total error: ", errorRate, "\n"
+        if errorRate == 0.0: 
+            break
+    return weakClassArr
