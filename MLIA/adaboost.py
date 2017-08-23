@@ -19,6 +19,7 @@ For every feature in the dataset:
             set this stump as the best stump
 return best stump
 '''
+# Compare data by threshold
 def stumpClassify(dataMatrix, dimen, threshVal, threshIneq):
     retArray = ones((shape(dataMatrix)[0], 1))
     if threshIneq = 'lt':
@@ -53,3 +54,16 @@ def buildStump(dataArr, classLabels, D):
                     bestStump['dim'] = i
                     bestStump['thresh'] = threshVal
     return bestStump, minError, bestClasEst
+
+'''
+AdaBoost training with decision stumps:
+For each iteration:
+    Find the best stump using buildStump()
+    Add the best stump to the stump array
+    Calculate alpha
+    Calculate new weight vector -D
+    Update the aggregate class estimate
+    If the error rate == 0.0:
+        break out of the for loop
+'''
+
