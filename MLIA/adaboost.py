@@ -22,7 +22,7 @@ return best stump
 # Compare data by threshold
 def stumpClassify(dataMatrix, dimen, threshVal, threshIneq):
     retArray = ones((shape(dataMatrix)[0], 1))
-    if threshIneq = 'lt':
+    if threshIneq == 'lt':
         retArray[dataMatrix[:, dimen] <= threshVal] = -1.0
     else:
         retArray[dataMatrix[:, dimen] > threshVal] = -1.0
@@ -34,7 +34,7 @@ def buildStump(dataArr, classLabels, D):
     m, n = shape(dataMatrix)
     numSteps = 10.0
     bestStump = {}
-    bestClasEst = mat(zeros(m, 1))
+    bestClasEst = mat(zeros((m, 1)))
     minError = inf
     for i in range(n):
         rangeMin = dataMatrix[:, i].min()
@@ -95,3 +95,16 @@ def adaBoostTrainDS(dataArr, classLabels, numIt = 40):
         if errorRate == 0.0: 
             break
     return weakClassArr
+
+# AdaBoost classification
+def adaClassify(datToClass, classifierArr):
+    dataMatrix = mat(datToClass)
+    m = shape(dataMatrix)[0]
+    aggClassEst = mat(zeros(m, 1))
+    for i in range(len(classifierArr)):
+        classEst = stumpClassify(dataMatrix, classifierArr[i]['dim'],\
+                                 classifierArr[i]['thresh'],\
+                                 classifierArr['ineq'])
+        aggClassEst += classifierArr[i]['alpha'] * classEst
+        print aggClassEst
+    return sign(aggClassEst)
