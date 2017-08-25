@@ -110,7 +110,7 @@ def adaBoostTrainDS(dataArr, classLabels, numIt = 40):
         print "total error: ", errorRate, "\n"
         if errorRate == 0.0: 
             break
-    return weakClassArr
+    return weakClassArr, aggClassEst
 
 # AdaBoost classification
 def adaClassify(datToClass, classifierArr):
@@ -124,3 +124,32 @@ def adaClassify(datToClass, classifierArr):
         aggClassEst += classifierArr[i]['alpha'] * classEst
         print aggClassEst
     return sign(aggClassEst)
+
+def plotROC(predStrengths, classLabels):
+    import matplotlib.pyplot as plt
+    cur = (1.0, 1.0)
+    ySum = 0.0
+    numPosClas = sum(array(classLabels) == 1.0)
+    yStep = 1/float(numPosClas)
+    xStep = 1/float(len(classLabels) - numPosClas)
+    sortedIndicies = predStrengths.argsort()
+    fig = plt.figure()
+    fig.clf()
+    ax = plt.subplot(111)
+    for index in sortedIndicies.tolist()[0]:
+        if classLabels[index] == 1.0:
+            delX = 0
+            delY = yStep
+        else:
+            delX = xStep
+            delY = 0
+            ySum += cur[1]
+        ax.plot([cur[0], cur[0]-delX], [cur[1], cur[1]-delY], c='b')
+        cur = (cur[0] - delX, cur[1] - delY)
+    ax.plot([0,1],[0,1],'b--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC curve for AdaBoost Horse Colic Detection')
+    ax.axis([0, 1, 0, 1])
+    plt.show()
+    print "The area under the curve is: ", ySum * xStep
