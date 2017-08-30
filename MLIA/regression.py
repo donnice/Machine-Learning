@@ -1,4 +1,5 @@
 from numpy import *
+import matplotlib.pyplot as plt
 
 def loadDataSet(fileName):
     numFeat = len(open(fileName).readline().split('\t')) - 1
@@ -71,4 +72,14 @@ def lwlrTest(testArr, xArr, yArr, k = 1.0):
     return yHat
 
 if __name__=="__main__":
-    
+    xArr, yArr = loadDataSet('ex0.txt')
+    lwlr(xArr[0], xArr, yArr, 1.0)
+    yHat = lwlrTest(xArr, xArr, yArr, 0.003)
+    xMat = mat(xArr)
+    srtInd = xMat[:, 1].argsort(0)
+    xSort = xMat[srtInd][:,0,:]
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(xSort[:, 1], yHat[srtInd])
+    ax.scatter(xMat[:, 1].flatten().A[0], mat(yArr).T.flatten().A[0] , s = 2, c = 'red')
+    plt.show()
