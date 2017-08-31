@@ -71,7 +71,31 @@ def lwlrTest(testArr, xArr, yArr, k = 1.0):
         yHat[i] = lwlr(testArr[i], xArr, yArr, k)
     return yHat
 
-if __name__=="__main__":
+def rssError(yArr, yHatArr):
+    return ((yArr - yHatArr)**2).sum()
+
+def predictAbalone():
+    abX, abY = loadData('abalone.txt')
+    yHat01 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 0.1)
+    yHat1 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 1)
+    yHat10 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 10)
+    print rssError(abY[0: 99], yHat01.T)
+    print rssError(abY[0: 99], yHat1.T)
+    print rssError(abY[0: 99], yHat10.T)
+
+    # Using the smallest kernel will overfit our data
+    yHat01 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 0.1)
+    print rssError(abY[100: 199], yHat01.T)
+    yHat1 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 1)
+    print rssError(abY[100: 199], yHat1.T)
+    yHat10 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 10)
+    print rssError(abY[100: 199], yHat10.T)
+
+    ws = standRegres(abX[0: 99], abY[0: 99])
+    yHat = mat(abX[100: 199]) * ws
+    print rssError(abY[100: 199], yHat.T.A)
+
+def plotLWLR():
     xArr, yArr = loadDataSet('ex0.txt')
     lwlr(xArr[0], xArr, yArr, 1.0)
     yHat = lwlrTest(xArr, xArr, yArr, 0.003)
