@@ -71,11 +71,14 @@ def lwlrTest(testArr, xArr, yArr, k = 1.0):
         yHat[i] = lwlr(testArr[i], xArr, yArr, k)
     return yHat
 
+# test error
 def rssError(yArr, yHatArr):
     return ((yArr - yHatArr)**2).sum()
 
 def predictAbalone():
-    abX, abY = loadData('abalone.txt')
+    abX, abY = loadDataSet('abalone.txt')
+
+    # Testing error
     yHat01 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 0.1)
     yHat1 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 1)
     yHat10 = lwlrTest(abX[0: 99], abX[0: 99], abY[0: 99], 10)
@@ -83,7 +86,7 @@ def predictAbalone():
     print rssError(abY[0: 99], yHat1.T)
     print rssError(abY[0: 99], yHat10.T)
 
-    # Using the smallest kernel will overfit our data
+    # Training error: using the smallest kernel will overfit our data
     yHat01 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 0.1)
     print rssError(abY[100: 199], yHat01.T)
     yHat1 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 1)
@@ -91,9 +94,40 @@ def predictAbalone():
     yHat10 = lwlrTest(abX[100: 199], abX[0: 99], abY[0: 99], 10)
     print rssError(abY[100: 199], yHat10.T)
 
+    # linear regression error
     ws = standRegres(abX[0: 99], abY[0: 99])
     yHat = mat(abX[100: 199]) * ws
     print rssError(abY[100: 199], yHat.T.A)
+
+# Ridge regression
+'''
+w = (X.T*X + (\lambda)*I).I*X.T*y
+notice that I is identity matrix, while .I means tranverse
+'''
+def ridgeRegres(xMat, yMat, lam = 0.2):
+    xTx = xMat.T * xMat
+    denom = xTx + eye(shape(xMat)[1])*lam
+    if linalg.det(denom) == 0.0:
+        print "This matrix is singular, cannot do inverse"
+        return
+    ws = denom.I * (xMat.T * yMat)
+    return ws
+
+def ridgeTest(xArr, yArr):
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
+    yMean = mean(yMat, 0)
+    yMat = yMat - yMean
+    xMeans = mean(xMat, 0)
+    xVar = var(xMat, 0) # Compute the variance along the specified axis
+    xMat = (xMat - xMeans) / xVar
+    numTestPts = 30
+    wMat = zeros((numTestPts, shape(xMat)[1]))
+    for i in range(numTestPts):
+        ws = ridgeRegres(xMat, yMat, exp(i - 10))
+        wMat[i, :] = ws.T
+    return wMat
+
 
 def plotLWLR():
     xArr, yArr = loadDataSet('ex0.txt')
