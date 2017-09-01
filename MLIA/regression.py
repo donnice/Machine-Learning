@@ -128,6 +128,20 @@ def ridgeTest(xArr, yArr):
         wMat[i, :] = ws.T
     return wMat
 
+# Lasso
+'''
+Pseudo-code:
+Regularize the data to have 0 mean and unit variance
+For every iteration:
+    Set lowestError to inf
+    For every feature:
+        For increasing and decreasing:
+            Change one coefficient to get a new W
+            Calculate the error with new W
+            If Error is lower than lowestError: 
+                set Wbest to current W
+        Update set W to Wbest
+'''
 
 def plotLWLR():
     xArr, yArr = loadDataSet('ex0.txt')
@@ -140,4 +154,13 @@ def plotLWLR():
     ax = fig.add_subplot(111)
     ax.plot(xSort[:, 1], yHat[srtInd])
     ax.scatter(xMat[:, 1].flatten().A[0], mat(yArr).T.flatten().A[0] , s = 2, c = 'red')
+    plt.show()
+
+def plotRidgeTest():
+    import matplotlib.pyplot as plt
+    abX, abY = loadDataSet('abalone.txt')
+    ridgeWeights = ridgeTest(abX, abY)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(ridgeWeights)
     plt.show()
