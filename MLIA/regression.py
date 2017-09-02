@@ -176,7 +176,15 @@ def regularize(xMat):
     inMat = (inMat - inMeans) / inVar
     return inMat
 
-
+def testStageWise():
+    xArr, yArr = loadDataSet('abalone.txt')
+    print stageWise(xArr, yArr, 0.01, 200)
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
+    yM = mean(yMat, 0)
+    yMat = yMat - yM
+    weights = standRegres(xMat, yMat.T)
+    print weights.T
 
 def plotLWLR():
     xArr, yArr = loadDataSet('ex0.txt')
