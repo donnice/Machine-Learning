@@ -200,8 +200,6 @@ def crossValidation(xArr, yArr, numVal = 10):
     xMat = mat(xArr); yMat = mat(yArr).T
     meanX = mean(xMat, 0); varX = var(xMat, 0)
     unReg = bestWeights / varX
-    
-
 
 # regularize by columns
 def regularize(xMat):
