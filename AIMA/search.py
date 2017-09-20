@@ -19,10 +19,29 @@ class Problem(object):
     def actions(self, state):
         """Return the actions that can be executed in the given
         state."""
-        return NotImplementedError
+        raise NotImplementedError
 
     def result(self, state, action):
-        
+        """Return the state that results from executing the given
+        action in the given state."""
+        raise NotImplementedError
+
+    def goal_test(self, state):
+        """Return True if the state is a goal."""
+        if isinstance(self.goal, list):
+            return is_in(state, self.goal)
+        else:
+            return state == self.goal
+    
+    def path_cost(self, c, state1, action, state2):
+        """Return the cost of a solution path that arrives at state2 from
+        state1 via action, assuming cost c to get up to state1."""
+        return c + 1
+
+    def value(self, state):
+        """For optimization problems, each state has a value.  Hill-climbing
+        and related algorithms try to maximize this value."""
+        raise NotImplementedError
 
 class Node:
     """
@@ -81,3 +100,28 @@ def hill_climbing(problem):
             break
         current = neighbor
     return current.state
+
+def boggle_hill_climbing(board=None, ntimes=100, verbose=True):
+    """Solve inverse Boggle by hill-climbing: find a high-scoring board by
+    starting with a random one and changing it."""
+    pass
+
+def exp_schedule(k=20, lam=0.005, limit=100):
+    """One possible schedule function for simulated annealing"""
+    return lambda x: (k * math.exp(-lam * x) if x < limit else 0)
+
+def simulated_annealing(problem, schedule=exp_schedule()):
+    current = Node(problem.initial)
+    # The largest positive integer supported by the platform’s Py_ssize_t type
+    for t in range(sys.maxsize):
+        T = schedule(t)
+        if T == 0:
+            return current.state
+        neighbors = current.expand(problem)
+        if not neighbors:
+            return current.state
+        next = random.choice(neighbors)
+        delta_e = problem.value(next.state) - problem.value(current.state)
+        # return p > random.uniform(0.0, 1.0)
+        if delta_e > 0 or probability(math.exp(delta_e / T)):
+            current = next
