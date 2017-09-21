@@ -125,3 +125,17 @@ def simulated_annealing(problem, schedule=exp_schedule()):
         # return p > random.uniform(0.0, 1.0)
         if delta_e > 0 or probability(math.exp(delta_e / T)):
             current = next
+
+def genetic_search(problem, fitness_fn, ngen=1000, pmut=0.1, n=20):
+    """Call genetic_algorithm on the appropriate parts of a problem.
+    This requires the problem to have states that can mate and mutate,
+    plus a value method that scores states."""
+
+    s = problem.initial_state
+    # s,a: state, action
+    states = [problem.result(s, a) for a in problem.actions(s)]
+    random.shuffle(states)
+    return genetic_algorithm(states[:n], problem.value, ngen, pmut)
+
+def genetic_algorithm(population, fitness_fn, ngen=1000, pmut=0.1, gene_pool=[0, 1], f_thres=None):
+    pass
