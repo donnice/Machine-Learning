@@ -110,6 +110,25 @@ def exp_schedule(k=20, lam=0.005, limit=100):
     """One possible schedule function for simulated annealing"""
     return lambda x: (k * math.exp(-lam * x) if x < limit else 0)
 
+def selection_chances(fitness_fn, population):
+    fitnesses = map(fitness_fn, population)
+    return weighted_sampler(population, fitnesses)
+
+def reproduce(x, y):
+    n = len(x)
+    # Return a randomly selected element from range(start, stop, step)
+    c = random.randrange(1, n)
+    return x[:c] + y[c:]
+
+def mutate(x, gene_pool):
+    n = len(x)
+    g = len(gene_pool)
+    c = random.randrange(0, n)
+    r = random.randrange(0, g)
+
+    new_gene = gene_pool[r]
+    return x[:c] + [new_gene] + x[c+1:]
+
 def simulated_annealing(problem, schedule=exp_schedule()):
     current = Node(problem.initial)
     # The largest positive integer supported by the platform’s Py_ssize_t type
@@ -138,4 +157,23 @@ def genetic_search(problem, fitness_fn, ngen=1000, pmut=0.1, n=20):
     return genetic_algorithm(states[:n], problem.value, ngen, pmut)
 
 def genetic_algorithm(population, fitness_fn, ngen=1000, pmut=0.1, gene_pool=[0, 1], f_thres=None):
-    pass
+    """[Figure 4.8]"""
+    for i in range(ngen):
+        new_population = []
+        random_selection = selection_chances(fitness_fn, population)
+        for j in range(len(population)):
+            x = random_selection()
+            y = random_selection()
+            child = reproduce(x, y)
+            if random.uniform(0, 1) < pmut:
+                child = mutate(child, gene_pool)
+            new_population.append(child)
+        population = new_population
+
+        if t_thres:
+            fittest_individual = argmax(population, key=fitness_fn)
+            if fitness_fn(fittest_individual) >= f_thres:
+                return fittest_individual
+    # With a single iterable argument, return its largest item. 
+    # With two or more arguments, return the largest argument.
+    return argmax(population, key=fitness_fn)
