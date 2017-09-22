@@ -34,6 +34,12 @@ class Mimic(object):
         return: A list containing the top percentile of data points
         """
         samples = self.sample_set.get_percentile(self.percentile)
+        self.distribution = Distribution(samples)
+        self.sample_set = SampleSet(
+            self.distribution.generate_samples(self.samples),
+            self.fitness_function
+        )
+        return self.sample_set.get_percentile(self.percentile)
 
     def _generate_initial_samples(self):
         return [self._generate_initial_sample() for i in xrange(self.samples)]
@@ -55,3 +61,19 @@ class SampleSet(object):
             reverse=self.maximize
         )
         return np.array(sorted_samples)
+
+    def get_percentile(self, percentile):
+        fit_samples = self.calculate_fitness()
+        index = int(len(fit_samples) * percentile)
+        return fit_samples[:index]
+
+class Distribution(object):
+    def __init__(self, samples):
+        self.samples = samples
+        self.complete_graph = self._generate_mutual_information_graph()
+        self.spanning_graph = self._generate_spanning_graph()
+        self._generate_bayes_net()
+    
+    
+
+    
