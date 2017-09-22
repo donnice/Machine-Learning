@@ -42,6 +42,7 @@ class Mimic(object):
         return self.sample_set.get_percentile(self.percentile)
 
     def _generate_initial_samples(self):
+        # xrange is slightly faster than range
         return [self._generate_initial_sample() for i in xrange(self.samples)]
 
     def _generate_initial_sample(self):
@@ -74,6 +75,44 @@ class Distribution(object):
         self.spanning_graph = self._generate_spanning_graph()
         self._generate_bayes_net()
     
-    
+    def generate_samples(self, number_to_generate):
+        root = 0
+        sample_len = len(self.bayes_net.node)
+        samples = np.zeros((number_to_generate, sample_len))
+        values = self.bayes_net.node[root]["probabilities"].keys()
+        probabilities = self.bayes_net.node[root]["probabilites"].values()
+        # Random variates of given type.
+        # name: The name of the instance.
+        # values: (xk, pk) where xk are integers with non-zero probabilities 
+        #                        pk with sum(pk) = 1
+        dist = stats.rv_discrete(name="dist", values=(values, probabilities))
+        # Random number generation
+        samples[:, 0] = dist.rvs(size=number_to_generate)
+        # Iterate over edges in a breadth-first-search starting at source
+        for parent, current in nx.bfs_edges(self.bayes_net, root):
+            for i in xrange(number_to_generate):
+                parent_val = samples[i, parent]
+                current_node = self.bayes_net.node[current]
+                cond_dist = current_node["probabilities"][int(parent_val)]
+                values = cond_dist.keys()
+                probabilities = cond_dist.values()
+                dist = stats.rv_discrete(
+                    name="dist",
+                    values=(values, probabilities)
+                )
+                samples[i, current] = dist.rvs()
+        return samples
+
+
+    def _generate_bayes_net(self):
+        # 1. Start at any node (0)
+        # 2. At each node figure out the conditional prob
+        # 3. Add it to the new graph
+        # 4. Find unprocessed adjacent nodes
+        # 5. If any go to 2
+        #      Else return the bayes net
+
+        # Will it be possible that zero is not root? If
+        # so, we need to pick one
 
     
