@@ -84,7 +84,7 @@ class Distribution(object):
         # Random variates of given type.
         # name: The name of the instance.
         # values: (xk, pk) where xk are integers with non-zero probabilities 
-        #                        pk with sum(pk) = 1
+        # pk with sum(pk) = 1
         dist = stats.rv_discrete(name="dist", values=(values, probabilities))
         # Random number generation
         samples[:, 0] = dist.rvs(size=number_to_generate)
@@ -148,5 +148,55 @@ class Distribution(object):
                 self.bayes_net.node[child][parent_val].update(parent_nodes)
 
             self.bayes_net.node[child] = dict(probabilities=self.bayes_net.node[child])
-            
 
+        # PRIM_MST Compute a minimum spanning with Prims's algorithm.
+        def _generate_spanning_graph(self):
+            return nx.prim_mst(self.complete_graph)
+
+        def _generate_mutual_information_graph(self):
+            samples = np.asarray(self.samples)
+            complete_graph = nx.complete_graph(samples.shape[1])
+
+            for edge in complete_graph.edges():
+                mutual_info = mutual_info_score(
+                    samples[:, edge[0]],
+                    samples[:, edge[1]]
+                )
+
+                complete_graph.edge[edge[0]][edge[1]]['weight'] = -mutual_info
+
+            return complete_graph
+
+if __name__ == "__main__":
+    samples = [
+        [1, 0, 0, 1],
+        [1, 0, 1, 1],
+        [0, 1, 1, 0],
+        [0, 1, 1, 1],
+        [0, 1, 1, 0],
+        [1, 0, 1, 1],
+        [1, 0, 0, 0],
+    ]
+
+    distribution = Distribution(samples)
+
+    distribution._generate_bayes_net()
+
+    for node_ind in distribution.bayes_net.nodes():
+        print distribution.bayes_net.node[node_ind]
+    
+    pos = nx.spring_layout(distribution.spanning_graph)
+
+    edge_labels = dict(
+        [((u, v,), d['weight'])
+        for u, v, d in distribution.spanning_graph.edges(data=True)]
+    )
+
+    nx.draw_networkx(distribution.spanning_graph, pos)
+    nx.draw_networkx_edge_labels(
+        distribution.spanning_graph,
+        pos,
+        edge_label=edge_labels
+    )
+
+    plt.show()
