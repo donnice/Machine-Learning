@@ -127,7 +127,26 @@ class Distribution(object):
             # Return an iterator over predecessor nodes of n
             if not self.bayes_net.predecessors(parent):
                 freqs = np.histogram(parent_array, len(np.unique(parent_array)))[0]
-                parent_probs
+                # zip([a,b,c],[1,2,3]) -> [(a, 1), (...)]
+                parent_probs = dict(zip(np.unique(sub_child), freqs/(sum(freqs)*1.0)))
 
+                self.bayes_net.node[parent]["probabilities"] = {x:0 for x in range(len(self.samples))}
+                self.bayes_net.node[parent]["probabilities"].update(parent_nodes)
 
-    
+            child_array = samples[:, child]
+
+            unique_parent = np.unique(parent_array)
+            for parent_val in unique_parents:
+                parent_inds = np.argwhere(parent_array == parent_val)
+                sub_child = child_array[parent_inds]
+
+                # Compute the histogram of a set of data.
+                freqs = np.histogram(sub_child, len(np.unique(sub_child)))[0]
+                child_probs = dict(zip(np.unique(sub_child), freqs/(sum(freqs)*1.0)))
+
+                self.bayes_net.node[child][parent_val] = {x:0 for x in range(len(self.samples))}
+                self.bayes_net.node[child][parent_val].update(parent_nodes)
+
+            self.bayes_net.node[child] = dict(probabilities=self.bayes_net.node[child])
+            
+
