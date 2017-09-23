@@ -114,5 +114,20 @@ class Distribution(object):
 
         # Will it be possible that zero is not root? If
         # so, we need to pick one
+        root = 0
+
+        samples = np.asarry(self.samples)
+        self.bayes_net = nx.bfs_tree(self.spanning_graph, root)
+        
+        for parent, child in self.bayes_net.edges():
+            parent_array = samples[:, parent]
+
+            # if node is not root, get probability of 
+            # each gene appearing in parent
+            # Return an iterator over predecessor nodes of n
+            if not self.bayes_net.predecessors(parent):
+                freqs = np.histogram(parent_array, len(np.unique(parent_array)))[0]
+                parent_probs
+
 
     
